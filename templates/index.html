@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Generator - Powered by Gemini</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 AI Form Generator</h1>
+            <p class="subtitle">Powered by Google Gemini 2.5 Flash</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <h2>Describe Your Form</h2>
+                <textarea 
+                    id="promptInput" 
+                    placeholder="Example: Create a registration form for a tech conference with attendee details, workshop preferences, and dietary requirements"
+                    rows="4"
+                ></textarea>
+                
+                <button id="generateBtn" class="btn btn-primary">
+                    <span class="btn-text">Generate Form Fields</span>
+                    <span class="btn-loader" style="display: none;">⏳ Generating...</span>
+                </button>
+            </div>
+
+            <div id="resultSection" class="result-section" style="display: none;">
+                <div class="section-header">
+                    <h2>Generated Form Fields</h2>
+                    <button id="copyBtn" class="btn btn-secondary">📋 Copy</button>
+                </div>
+                <div id="resultContent" class="result-content"></div>
+            </div>
+
+            <div id="errorSection" class="error-section" style="display: none;">
+                <h3>❌ Error</h3>
+                <p id="errorMessage"></p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Built with Flask & Google Gemini API</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
