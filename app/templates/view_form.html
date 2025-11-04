@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ form.title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="form-page">
+    <div class="form-preview-container {{ form.theme }}">
+        <h1>{{ form.title }}</h1>
+        <form method="post">
+            {% for field in form.fields %}
+                <div class="form-group">
+                    <label for="field-{{ field.id }}">{{ field.label }}</label>
+                    {% if field.field_type == 'select' %}
+                        <select name="field-{{ field.id }}" id="field-{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+                            {% for option in field.options.split(',') %}
+                                <option value="{{ option.strip() }}">{{ option.strip() }}</option>
+                            {% endfor %}
+                        </select>
+                    {% elif field.field_type == 'textarea' %}
+                        <textarea name="field-{{ field.id }}" id="field-{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}></textarea>
+                    {% else %}
+                        <input type="{{ field.field_type }}" name="field-{{ field.id }}" id="field-{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
+
+
+
+
+

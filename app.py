@@ -25,7 +25,7 @@ def generate_fields():
     
     Expected JSON payload:
     {
-        "prompt": "user's form description"
+        "prompt": "user's form description (enhanced with context)"
     }
     
     Returns:
@@ -54,7 +54,7 @@ def generate_fields():
                 'error': 'Prompt cannot be empty'
             }), 400
         
-        # Generate fields using Gemini service
+        # Generate fields using Gemini service with enhanced prompt
         result = gemini_service.generate_form_fields(user_prompt)
         
         if result['success']:

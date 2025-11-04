@@ -1,0 +1,15 @@
+# Environments
+.env
+venv/
+__pycache__/
+
+# IDE specific
+.idea/
+.vscode/
+
+# Python cache
+*.pyc
+
+# Database
+app.db
+migrations/

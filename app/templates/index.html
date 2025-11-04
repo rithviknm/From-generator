@@ -4,21 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FormEasy - AI-Powered Form Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        window.isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+    </script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>✨ FormEasy</h1>
+            <div class="animation-container"></div>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary auth-btn">Dashboard</a>
+                <a href="{{ url_for('main.logout') }}" class="btn btn-secondary auth-btn" style="right: 120px;">Log Out</a>
+            {% else %}
+                <a href="{{ url_for('main.login') }}" class="btn btn-secondary auth-btn">Log In</a>
+            {% endif %}
+            <h1>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="header-logo"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.59L7.41 13l1.41-1.41L11 14.17l4.59-4.59L17 11l-6 6z" fill="url(#grad1)"/></svg>
+                <strong>FormEasy</strong>
+            </h1>
             <p class="subtitle">AI-Powered Form Generator by Google Gemini</p>
         </header>
+
+        {% if not current_user.is_authenticated %}
+<!-- HERO SECTION -->
+<div class="hero-illustration-bg">
+    <svg class="hero-svg" width="100%" height="180" viewBox="0 0 1100 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="850" cy="-20" rx="320" ry="110" fill="#a78bfa" opacity="0.18" />
+        <ellipse cx="300" cy="100" rx="350" ry="110" fill="#ec4899" opacity="0.13" />
+    </svg>
+    <div class="hero-content">
+        <h1 class="hero-title">Welcome to <span class="brand-gradient-text">FormEasy</span></h1>
+        <p class="hero-lead">Instantly create, theme, and share beautiful AI-generated forms.<br> Collect responses from anywhere, on any device!</p>
+        <div class="hero-cta-btns">
+            <a href="{{ url_for('main.signup') }}" class="btn btn-primary">Get Started Free</a>
+            <a href="{{ url_for('main.login') }}" class="btn btn-secondary">Login</a>
+        </div>
+    </div>
+</div>
+
+<!-- FEATURES SECTION -->
+<div class="features-row">
+    <div class="feature-card animate-in"><span class="feature-icon">🤖</span>
+        <h3>AI-Generated Forms</h3>
+        <p>Describe your need. Let advanced AI design your entire form, tailored with smart fields and validations.</p>
+    </div>
+    <div class="feature-card animate-in" style="animation-delay:0.06s;"><span class="feature-icon">🎨</span>
+        <h3>Modern Themes</h3>
+        <p>Choose from gorgeous themes. Your form will look beautiful on any screen, big or small.</p>
+    </div>
+    <div class="feature-card animate-in" style="animation-delay:0.12s;"><span class="feature-icon">📊</span>
+        <h3>Real-Time Dashboard</h3>
+        <p>See responses collected instantly. Download results or analyze right in the app—privacy protected.</p>
+    </div>
+    <div class="feature-card animate-in" style="animation-delay:0.18s;"><span class="feature-icon">🔗</span>
+        <h3>Easy Sharing</h3>
+        <p>Send your auto-generated form link to anyone, anywhere. No login needed for responders.</p>
+    </div>
+</div>
+
+<!-- HOW IT WORKS SECTION -->
+<div class="how-works">
+    <h2>How FormEasy Works</h2>
+    <div class="steps-row">
+        <div class="step-card"><div class="step-number">1</div>
+            <div class="step-icon">💡</div>
+            <strong>Describe</strong><br><span>Tell us what kind of data you want to collect.</span></div>
+        <div class="step-card"><div class="step-number">2</div>
+            <div class="step-icon">👀</div>
+            <strong>Preview & Theme</strong><br><span>Choose your look. See your AI-generated form instantly.</span></div>
+        <div class="step-card"><div class="step-number">3</div>
+            <div class="step-icon">🚀</div>
+            <strong>Share & Collect</strong><br><span>Send a link, get responses, track results in your dashboard.</span></div>
+    </div>
+</div>
+
+<!-- CTA Section & Alert -->
+<div class="landing-welcome">
+    <h2>Ready to build your first AI form?</h2>
+    <p>Join FormEasy now and create powerful, beautiful forms in seconds.</p>
+    <div class="landing-cta">
+        <a href="{{ url_for('main.signup') }}" class="btn btn-primary">Sign Up Free</a>
+        <a href="{{ url_for('main.login') }}" class="btn btn-secondary">Log In</a>
+    </div>
+    <div class="alert alert-info" style="margin-top:32px;">You must log in to generate or share forms.</div>
+</div>
+{% endif %}
 
         <main>
             <!-- Initial Questions Modal -->
             <div id="initialQuestionsModal" class="modal" style="display: flex;">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2>📋 Tell Us About Your Form</h2>
+                        <h2>Tell Us About Your Form</h2>
                         <p class="modal-subtitle">These details will help us create a better form for you</p>
                     </div>
                     <div class="modal-body">
@@ -37,7 +116,7 @@
                     </div>
                     <div class="modal-footer">
                         <button id="skipQuestionsBtn" class="btn btn-ghost">Skip →</button>
-                        <button id="startCreatingBtn" class="btn btn-primary">✨ Start Creating</button>
+                        <button id="startCreatingBtn" class="btn btn-primary">Start Creating</button>
                     </div>
                 </div>
             </div>
@@ -57,20 +136,24 @@
                 ></textarea>
                 
                 <button id="generateBtn" class="btn btn-primary">
-                    <span class="btn-text">✨ Generate Form Fields</span>
-                    <span class="btn-loader" style="display: none;">⏳ Generating...</span>
+                    <span class="btn-text">Generate Form Fields</span>
+                    <div class="loader" style="display: none;"></div>
                 </button>
             </div>
 
             <!-- Result Section -->
             <div id="resultSection" class="result-section" style="display: none;">
                 <div class="section-header">
-                    <h2>🎯 Generated Form Fields</h2>
+                    <h2>Generated Form Fields</h2>
                     <div class="header-actions">
-                        <button id="addFieldBtn" class="btn btn-success">➕ Add Field</button>
-                        <button id="selectAllBtn" class="btn btn-secondary">✓ Select All</button>
-                        <button id="deselectAllBtn" class="btn btn-secondary">✗ Deselect All</button>
-                        <button id="copyBtn" class="btn btn-secondary">📋 Copy</button>
+                        <button id="addFieldBtn" class="btn btn-success">
+                            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/></svg>
+                            Add Field
+                        </button>
+                        <button id="selectAllBtn" class="btn btn-secondary">Select All</button>
+                        <button id="deselectAllBtn" class="btn btn-secondary">Deselect All</button>
+                        <button id="copyBtn" class="btn btn-secondary">Copy</button>
+                        <button id="previewBtn" class="btn btn-primary">Preview Form</button>
                     </div>
                 </div>
                 
@@ -83,13 +166,13 @@
             </div>
 
             <div id="errorSection" class="error-section" style="display: none;">
-                <h3>❌ Error</h3>
+                <h3>Error</h3>
                 <p id="errorMessage"></p>
             </div>
         </main>
 
         <footer>
-            <p>✨ Powered by Google Gemini & Team NEXORA</p>
+            <p>Powered by Google Gemini & Team NEXORA</p>
         </footer>
     </div>
 
@@ -97,7 +180,7 @@
     <div id="editModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>✏️ Edit Field</h2>
+                <h2>Edit Field</h2>
                 <button class="modal-close" onclick="closeEditModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -131,7 +214,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveEdit()">💾 Save Changes</button>
+                <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
             </div>
         </div>
     </div>
@@ -140,7 +223,7 @@
     <div id="addFieldModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>➕ Add New Field</h2>
+                <h2>Add New Field</h2>
                 <button class="modal-close" onclick="closeAddFieldModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -174,10 +257,50 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeAddFieldModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveNewField()">✅ Add Field</button>
+                <button class="btn btn-primary" onclick="saveNewField()">Add Field</button>
             </div>
         </div>
     </div>
+    
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal" style="display: none;">
+        <div class="modal-content preview-modal-content">
+            <div class="modal-header">
+                <h2>Form Preview</h2>
+                <button class="modal-close" onclick="closePreviewModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="theme-selector">
+                    <label for="themeSwitcher" style="font-weight:700;margin-right:12px;">Theme:</label>
+                    <select id="themeSwitcher" class="form-control theme-select">
+                        <option value="default" data-theme-color="#a78bfa">🕊️ Original Classic</option>
+                        <option value="vibrant" data-theme-color="#ec4899">🌈 Vibrant Gradient</option>
+                        <option value="pastel" data-theme-color="#8ec5fc">🍬 Pastel Playful</option>
+                        <option value="retro" data-theme-color="#e14fad">🧃 Retro Wave</option>
+                        <option value="neon" data-theme-color="#00e9f4">💡 Neon Pulse</option>
+                        <option value="dark" data-theme-color="#232433">🌑 Serene Dark</option>
+                        <option value="minimalist" data-theme-color="#c7d2fe">🥥 Sleek Minimalist</option>
+                    </select>
+                </div>
+                <div id="formPreviewContainer" class="form-preview-container">
+                    <!-- Generated form will be injected here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closePreviewModal()">Close</button>
+                <button class="btn btn-success" id="finalizeBtn">Finalize & Get URL</button>
+            </div>
+        </div>
+    </div>
+
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#a78bfa;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+    </svg>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

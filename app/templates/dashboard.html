@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - FormEasy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="{{ url_for('main.index') }}" class="btn btn-secondary auth-btn">Home</a>
+        </header>
+        <main>
+            <h1>My Forms</h1>
+            <div class="dashboard-forms-list">
+                {% for form in forms %}
+                    <div class="form-card">
+                        <h2>{{ form.title }}</h2>
+                        <p>{{ form.responses.count() }} responses</p>
+                        <a href="{{ url_for('main.view_responses', form_id=form.id) }}" class="btn btn-primary">View Responses</a>
+                    </div>
+                {% else %}
+                    <p>You haven't created any forms yet.</p>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
+
+
+
+

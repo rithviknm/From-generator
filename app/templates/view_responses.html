@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responses for {{ form.title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary auth-btn">Back to Dashboard</a>
+        </header>
+        <main>
+            <h1>Responses for "{{ form.title }}"</h1>
+            <div class="responses-table-container">
+                <table class="responses-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            {% for field in form.fields.all() %}
+                                <th>{{ field.label }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for response in form.responses.all() %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                {% for answer in response.answers.all() %}
+                                    <td>{{ answer.value }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="{{ form.fields.count() + 1 }}">No responses yet.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
+
+
+
+

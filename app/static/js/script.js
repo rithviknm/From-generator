@@ -1,8 +1,8 @@
 // Get DOM elements
 const promptInput = document.getElementById('promptInput');
 const generateBtn = document.getElementById('generateBtn');
-const btnText = document.querySelector('.btn-text');
-const btnLoader = document.querySelector('.btn-loader');
+const btnText = generateBtn.querySelector('.btn-text');
+const btnLoader = generateBtn.querySelector('.loader');
 const resultSection = document.getElementById('resultSection');
 const fieldsContainer = document.getElementById('fieldsContainer');
 const errorSection = document.getElementById('errorSection');
@@ -21,6 +21,12 @@ const startCreatingBtn = document.getElementById('startCreatingBtn');
 const addFieldBtn = document.getElementById('addFieldBtn');
 const formContext = document.getElementById('formContext');
 const contextTitle = document.getElementById('contextTitle');
+const previewModal = document.getElementById('previewModal');
+const previewBtn = document.getElementById('previewBtn');
+const themeSwitcher = document.getElementById('themeSwitcher');
+const formPreviewContainer = document.getElementById('formPreviewContainer');
+const finalizeBtn = document.getElementById('finalizeBtn');
+
 
 // Store fields data and form context
 let fieldsData = [];
@@ -41,6 +47,9 @@ toggleRawBtn.addEventListener('click', toggleRawResponse);
 startCreatingBtn.addEventListener('click', handleInitialQuestions);
 skipQuestionsBtn.addEventListener('click', skipInitialQuestions);
 addFieldBtn.addEventListener('click', openAddFieldModal);
+previewBtn.addEventListener('click', openPreviewModal);
+themeSwitcher.addEventListener('change', applyTheme);
+finalizeBtn.addEventListener('click', finalizeForm);
 
 // Allow Enter + Shift to generate
 promptInput.addEventListener('keydown', (e) => {
@@ -49,6 +58,51 @@ promptInput.addEventListener('keydown', (e) => {
         generateFormFields();
     }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    createFlyingForms();
+
+    // Optionally restrict features if not logged in
+    if (typeof window.isAuthenticated !== 'undefined' && !window.isAuthenticated) {
+        // Hide/disable generation features
+        document.getElementById('mainInputSection').style.display = 'none';
+        document.getElementById('initialQuestionsModal').style.display = 'none';
+        // Show informational message
+        const authMsg = document.createElement('div');
+        authMsg.className = 'alert alert-danger';
+        authMsg.innerText = 'You must log in to generate a form.';
+        document.querySelector('.container').insertAdjacentElement('afterbegin', authMsg);
+    }
+});
+
+function createFlyingForms() {
+    const container = document.querySelector('.animation-container');
+    if (!container) return;
+
+    const icons = ['📝', '📋', '📄', '🖋️', '🗒️', '📑'];
+    const formCount = 20;
+
+    for (let i = 0; i < formCount; i++) {
+        const form = document.createElement('div');
+        form.classList.add('form-icon');
+        
+        const size = Math.random() * 80 + 20; // 20px to 100px
+        form.style.width = `${size}px`;
+        form.style.height = `${size}px`;
+        
+        form.style.left = `${Math.random() * 100}%`;
+        
+        const animationDuration = Math.random() * 15 + 10; // 10s to 25s
+        form.style.animationDuration = `${animationDuration}s`;
+        
+        const animationDelay = Math.random() * 10; // 0s to 10s
+        form.style.animationDelay = `${animationDelay}s`;
+        
+        form.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+        
+        container.appendChild(form);
+    }
+}
 
 /**
  * Handle initial questions
@@ -82,7 +136,7 @@ function skipInitialQuestions() {
  * Main function to generate form fields
  */
 async function generateFormFields() {
-    const prompt = promptInput.value.trim();
+    const prompt = typeof promptInput.value === 'string' ? promptInput.value.trim() : '';
     
     if (!prompt) {
         showError('Please enter a description for your form');
@@ -108,8 +162,16 @@ async function generateFormFields() {
             body: JSON.stringify({ prompt: enhancedPrompt })
         });
         
-        const data = await response.json();
-        
+        let data;
+        try {
+            data = await response.json();
+        } catch(jsonErr) {
+            const fallbackText = await response.text();
+            showError('Internal server error: ' + fallbackText);
+            setLoading(false);
+            return;
+        }
+
         if (data.success) {
             parseAndDisplayFields(data.fields, data.raw_response);
         } else {
@@ -126,16 +188,23 @@ async function generateFormFields() {
 /**
  * Parse the response and display fields
  */
-function parseAndDisplayFields(fieldsText, rawText) {
-    fieldsData = parseFields(fieldsText);
-    
-    if (fieldsData.length === 0) {
+function parseAndDisplayFields(fields, rawText) {
+    // If fields is already an array (from structured backend), use directly
+    if (Array.isArray(fields)) {
+        fieldsData = fields;
+    } else if (typeof fields === 'string') {
+        fieldsData = parseFields(fields);
+    } else {
+        showError('Unexpected response format from server.');
+        return;
+    }
+    ensureFieldsSelected(); // always
+    if (!fieldsData || fieldsData.length === 0) {
         showError('No fields could be parsed from the response');
         return;
     }
-    
     displayFields();
-    rawResponse.textContent = rawText;
+    rawResponse.textContent = typeof rawText === 'string' ? rawText : '';
     resultSection.style.display = 'block';
     resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -144,6 +213,7 @@ function parseAndDisplayFields(fieldsText, rawText) {
  * Parse fields from text
  */
 function parseFields(text) {
+    if (typeof text !== 'string') return [];
     const fields = [];
     const lines = text.trim().split('\n');
     
@@ -189,9 +259,144 @@ function parseFields(text) {
 }
 
 /**
+ * Open the preview modal and render the form
+ */
+function openPreviewModal() {
+    previewModal.style.display = 'flex';
+    renderFormPreview();
+}
+
+/**
+ * Close the preview modal
+ */
+function closePreviewModal() {
+    previewModal.style.display = 'none';
+}
+
+/**
+ * Render the form preview
+ */
+function renderFormPreview() {
+    ensureFieldsSelected();
+    // Sync JS: recalc selected from DOM checkboxes (fixes stale JS/UI mismatch)
+    const checkboxes = document.querySelectorAll('.field-item input[type="checkbox"]');
+    checkboxes.forEach((cb, idx) => {
+        if (fieldsData[idx]) fieldsData[idx].selected = cb.checked;
+    });
+
+    console.log('fieldsData:', fieldsData);
+    const selectedFields = fieldsData.filter(f => !!f.selected);
+    console.log('selectedFields:', selectedFields);
+
+    formPreviewContainer.innerHTML = '';
+    if (selectedFields.length === 0) {
+        formPreviewContainer.innerHTML = '<p>No fields selected for the form.</p>';
+        return;
+    }
+    const form = document.createElement('form');
+    selectedFields.forEach(field => {
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
+        const label = document.createElement('label');
+        label.textContent = field.label;
+        formGroup.appendChild(label);
+        let inputElement;
+        switch (field.dataType && field.dataType.toLowerCase()) {
+            case 'select':
+                inputElement = document.createElement('select');
+                const options = (field.enumValues || '').split(',').map(opt => opt.trim());
+                options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    inputElement.appendChild(option);
+                });
+                break;
+            case 'textarea':
+                inputElement = document.createElement('textarea');
+                break;
+            default:
+                inputElement = document.createElement('input');
+                inputElement.type = field.dataType ? field.dataType.toLowerCase() : 'text';
+        }
+        inputElement.className = 'form-control';
+        inputElement.placeholder = field.description || '';
+        if (field.validation && field.validation.includes('required')) {
+            inputElement.required = true;
+        }
+        formGroup.appendChild(inputElement);
+        form.appendChild(formGroup);
+    });
+    const submitButton = document.createElement('button');
+    submitButton.type = 'submit';
+    submitButton.className = 'btn btn-primary';
+    submitButton.textContent = 'Submit';
+    form.appendChild(submitButton);
+    formPreviewContainer.appendChild(form);
+    applyTheme();
+}
+
+/**
+ * Apply the selected theme to the preview
+ */
+function applyTheme() {
+    const selectedTheme = themeSwitcher.value;
+    formPreviewContainer.className = 'form-preview-container'; // Reset classes
+    formPreviewContainer.classList.add(selectedTheme);
+}
+
+/**
+ * Finalize the form and get a shareable URL
+ */
+async function finalizeForm() {
+    const selectedFields = fieldsData.filter(f => f.selected);
+    const theme = themeSwitcher.value;
+    const title = formContextData.title || 'My New Form';
+
+    if (selectedFields.length === 0) {
+        alert('Please select at least one field to finalize the form.');
+        return;
+    }
+
+    try {
+        const response = await fetch('/finalize_form', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fields: selectedFields,
+                theme: theme,
+                title: title
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            const url = data.url;
+            formPreviewContainer.innerHTML = `
+                <h2>Form created successfully!</h2>
+                <p>Share this URL with others:</p>
+                <input type="text" class="form-control" value="${url}" readonly>
+                <button class="btn btn-secondary" onclick="copyToClipboard('${url}')">Copy URL</button>
+            `;
+            finalizeBtn.style.display = 'none';
+        } else {
+            alert('Error finalizing form: ' + data.error);
+        }
+    } catch (error) {
+        alert('An error occurred while finalizing the form.');
+        console.error(error);
+    }
+}
+
+
+/**
  * Display all fields
  */
 function displayFields() {
+    ensureFieldsSelected(); // safety!
     fieldsContainer.innerHTML = '';
     
     fieldsData.forEach((field, index) => {
@@ -207,6 +412,7 @@ function displayFields() {
  * Create a field element with simplified display
  */
 function createFieldElement(field, index) {
+    if (typeof field.selected === 'undefined') field.selected = true;
     const div = document.createElement('div');
     div.className = 'field-item' + (field.selected ? ' selected' : '');
     div.dataset.index = index;
@@ -535,7 +741,7 @@ function setLoading(isLoading) {
     
     if (isLoading) {
         btnText.style.display = 'none';
-        btnLoader.style.display = 'inline';
+        btnLoader.style.display = 'block';
     } else {
         btnText.style.display = 'inline';
         btnLoader.style.display = 'none';
@@ -580,6 +786,13 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Guarantee all fields have a 'selected' property where appropriate
+function ensureFieldsSelected() {
+    fieldsData.forEach(f => {
+        if (typeof f.selected === 'undefined') f.selected = true;
+    });
 }
 
 // Close modals when clicking outside

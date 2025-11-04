@@ -35,9 +35,11 @@ class GeminiService:
             full_prompt = self._build_prompt(user_prompt)
             response = self.model.generate_content(full_prompt)
             
+            parsed_fields = self.parse_fields(response.text)
+
             return {
                 'success': True,
-                'fields': response.text,
+                'fields': parsed_fields,
                 'raw_response': response.text
             }
         except Exception as e:
@@ -92,11 +94,32 @@ Provide ONLY the numbered list of fields. Keep it concise and user-friendly."""
         
         for line in lines:
             line = line.strip()
-            if line and line[0].isdigit():
-                # Remove numbering
-                parts = line.split('.', 1)
-                if len(parts) > 1:
-                    field_data = parts[1].strip()
-                    fields.append({'raw': field_data})
+            if not line or not line[0].isdigit():
+                continue
+
+            # Remove numbering
+            parts = line.split('.', 1)
+            if len(parts) < 2:
+                continue
+            
+            field_data_str = parts[1].strip()
+            field_parts = [p.strip() for p in field_data_str.split(',')]
+
+            if len(field_parts) < 3:
+                continue
+
+            field = {
+                'label': field_parts[0],
+                'description': field_parts[1],
+                'type': field_parts[2],
+                'validation': field_parts[3] if len(field_parts) > 3 else '',
+                'options': field_parts[4] if len(field_parts) > 4 else []
+            }
+
+            # Parse options if they exist
+            if isinstance(field['options'], str) and field['options'].startswith('[') and field['options'].endswith(']'):
+                field['options'] = [opt.strip() for opt in field['options'][1:-1].split(',')]
+
+            fields.append(field)
         
         return fields
