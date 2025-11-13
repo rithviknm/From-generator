@@ -5,7 +5,7 @@ from services.gemini_service import GeminiService
 app = Flask(__name__)
 
 # Configuration
-API_KEY = "AIzaSyAH58t0IB4KHKnXaEguQA5wSRgvHQbOBIw"  # Put your Gemini API key here
+API_KEY = os.environ.get('GEMINI_API_KEY')
 gemini_service = None
 
 if API_KEY:
