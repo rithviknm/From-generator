@@ -67,11 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hide/disable generation features
         document.getElementById('mainInputSection').style.display = 'none';
         document.getElementById('initialQuestionsModal').style.display = 'none';
-        // Show informational message
-        const authMsg = document.createElement('div');
-        authMsg.className = 'alert alert-danger';
-        authMsg.innerText = 'You must log in to generate a form.';
-        document.querySelector('.container').insertAdjacentElement('afterbegin', authMsg);
     }
 });
 
