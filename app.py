@@ -5,7 +5,7 @@ from services.gemini_service import GeminiService
 app = Flask(__name__)
 
 # Configuration
-API_KEY = os.environ.get('GEMINI_API_KEY')
+API_KEY = os.environ.get('GOOGLE_API_KEY') or os.environ.get('GEMINI_API_KEY')
 gemini_service = None
 
 if API_KEY:
