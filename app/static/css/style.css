@@ -129,8 +129,17 @@ header h1 strong {
 .auth-btn {
     position: absolute;
     top: 20px;
+    z-index: 1;
+}
+
+.auth-buttons-container {
+    position: absolute;
+    top: 20px;
     right: 20px;
     z-index: 1;
+    display: flex;
+    gap: 12px;
+    align-items: center;
 }
 
 .subtitle {
