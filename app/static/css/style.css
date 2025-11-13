@@ -1102,20 +1102,23 @@ footer {
 .hero-title {
     font-size: 2.7rem;
     font-weight: 800;
-    color: var(--primary-dark);
+    color: #ffffff;
     margin-bottom: 8px;
     letter-spacing: -0.02em;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 .brand-gradient-text {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 45%, #ec4899 90%);
+    background: linear-gradient(135deg, #ffd700 0%, #ffeb3b 45%, #fff59d 90%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
     font-weight: 800;
+    text-shadow: none;
 }
 .hero-lead {
     font-size: 1.18rem;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.95);
     margin-bottom: 22px;
     font-weight: 500;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
 }
 .hero-cta-btns {
     display: flex; gap: 18px; justify-content: center; margin-top: 18px;
@@ -1187,11 +1190,31 @@ footer {
 .landing-welcome {
     margin: 32px auto 40px auto;
     max-width: 540px;
-    background: var(--bg-primary);
-    border-radius: 16px;
-    box-shadow: var(--shadow-lg);
-    padding: 37px 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: var(--shadow-2xl);
+    padding: 40px 32px;
     text-align: center;
+}
+
+.landing-welcome h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.landing-welcome p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+.landing-cta {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 /* Responsive tweaks */
 @media (max-width: 900px) {
