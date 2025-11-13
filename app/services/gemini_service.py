@@ -43,9 +43,23 @@ class GeminiService:
                 'raw_response': response.text
             }
         except Exception as e:
+            error_message = str(e)
+            
+            # Provide user-friendly error messages
+            if '503' in error_message or 'overloaded' in error_message.lower():
+                user_friendly_message = 'The AI service is currently overloaded. Please wait a moment and try again.'
+            elif 'timeout' in error_message.lower() or 'exceeded' in error_message.lower():
+                user_friendly_message = 'Request timed out. The AI service is busy. Please try again in a few seconds.'
+            elif 'quota' in error_message.lower() or 'rate limit' in error_message.lower():
+                user_friendly_message = 'API quota exceeded. Please try again later or check your API key limits.'
+            elif 'api key' in error_message.lower():
+                user_friendly_message = 'Invalid API key. Please check your Google API key configuration.'
+            else:
+                user_friendly_message = f'AI service error: {error_message}'
+            
             return {
                 'success': False,
-                'error': str(e),
+                'error': user_friendly_message,
                 'fields': None
             }
     
