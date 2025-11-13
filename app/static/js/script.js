@@ -62,9 +62,12 @@ promptInput.addEventListener('keydown', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
     createFlyingForms();
 
-    // Optionally restrict features if not logged in
-    if (typeof window.isAuthenticated !== 'undefined' && !window.isAuthenticated) {
-        // Hide/disable generation features
+    // Show form creation interface if logged in
+    if (typeof window.isAuthenticated !== 'undefined' && window.isAuthenticated) {
+        // Show the initial questions modal for logged-in users
+        document.getElementById('initialQuestionsModal').style.display = 'flex';
+    } else {
+        // Hide/disable generation features for non-authenticated users
         document.getElementById('mainInputSection').style.display = 'none';
         document.getElementById('initialQuestionsModal').style.display = 'none';
     }
